@@ -327,7 +327,7 @@
 										<key>_historyCapacity</key>
 										<integer>0</integer>
 										<key>bookmark</key>
-										<string>B6C146F411F534D1009C7EE2</string>
+										<string>B6C146F911F53A61009C7EE2</string>
 										<key>history</key>
 										<array>
 											<string>B6C144CC11F52513009C7EE2</string>
@@ -652,6 +652,7 @@
 	<integer>5</integer>
 	<key>WindowOrderList</key>
 	<array>
+		<string>B6C146FA11F53A61009C7EE2</string>
 		<string>B6C144A211F51F45009C7EE2</string>
 		<string>B6C144A311F51F45009C7EE2</string>
 		<string>/Users/robbiet480/Repos/scrup/scrup.xcodeproj</string>

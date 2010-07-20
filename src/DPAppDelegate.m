@@ -570,6 +570,8 @@ extern int pngcrush_main(int argc, char *argv[]);
 	[self performSelectorOnMainThread:@selector(_httpPostOperationDidSucceed:) withObject:op waitUntilDone:NO];
 }
 
+
+
 -(void)_httpPostOperationDidSucceed:(HTTPPOSTOperation *)op {
 	nCurrOps--;
 	NSString *rspstr = [[NSString alloc] initWithData:op.responseData encoding:NSUTF8StringEncoding];
@@ -631,7 +633,7 @@ extern int pngcrush_main(int argc, char *argv[]);
 										   iconData:nil
 										   priority:0
 										   isSticky:NO
-									   clickContext:[NSDate date]], op.path;
+									   clickContext:nil];
 			//NSLog(@"filename: %@", op.path);
 		}
 		else {
@@ -667,6 +669,40 @@ extern int pngcrush_main(int argc, char *argv[]);
 	// schedule in main thread since we want to avoid locks and stuff
 	[op.log error:@"failed with error %@", error];
 	[self performSelectorOnMainThread:@selector(_httpPostOperationDidFail:) withObject:[NSArray arrayWithObjects:op, error, nil] waitUntilDone:NO];
+	
+	//play sound
+	NSSound* confirm = [NSSound soundNamed:@"Basso"];
+	[confirm play];
+	
+	//growl alert
+	NSBundle *myBundle = [NSBundle bundleForClass:[DPAppDelegate class]];
+	NSString *growlPath = [[myBundle privateFrameworksPath] stringByAppendingPathComponent:@"Growl.framework"];
+	NSBundle *growlBundle = [NSBundle bundleWithPath:growlPath];
+	
+	if (growlBundle && [growlBundle load]) {
+		// Register ourselves as a Growl delegate
+		[GrowlApplicationBridge setGrowlDelegate:self];
+		
+		NSArray *path = [op.path componentsSeparatedByString:@"/"];
+		NSString *filename = [path objectAtIndex:(NSUInteger)4];
+		NSString *suffix = @" failed to upload. Please check the number and try your upload again!";
+		NSString *message = [filename stringByAppendingString:suffix];
+		//NSLog(@"Array is: %d\n%@", [path count], path);
+		
+		//NSLog(@"Array element: %@", filename);
+		[GrowlApplicationBridge notifyWithTitle:@"Upload failed!"
+									description:message
+							   notificationName:@"Upload failed"
+									   iconData:nil
+									   priority:0
+									   isSticky:NO
+								   clickContext:[NSDate date]];
+		//NSLog(@"filename: %@", op.path);
+	}
+	else {
+		NSLog(@"ERROR: Could not load Growl.framework");
+	}
+	
 }
 
 -(void)_httpPostOperationDidFail:(NSArray *)args {
