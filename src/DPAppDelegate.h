@@ -2,8 +2,8 @@
 #import "HTTPPOSTOperation.h"
 #import "DPAttachedWindow.h"
 #import "DPPreprocessingWindowController.h"
-
-@interface DPAppDelegate : NSObject {
+#import "Growl/Growl.h"
+@interface DPAppDelegate : NSObject <GrowlApplicationBridgeDelegate> {
 	NSUserDefaults *defaults;
 	NSStatusItem *statusItem;
 	IBOutlet NSWindow *mainWindow;
@@ -102,6 +102,8 @@
 -(void)vacuumUploadedScreenshots;
 -(void)writeThumbnailForScreenshotAtPath:(NSString *)path;
 -(BOOL)pngcrushPNGImageAtPath:(NSString *)path brute:(BOOL)brute;
+
+- (NSString *) applicationNameForGrowl;
 
 #pragma mark -
 #pragma mark Preprocessing UI

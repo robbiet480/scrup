@@ -5,6 +5,7 @@
 #import "NSBitmapImageRep+HUAdditions.h"
 
 #import <CoreServices/CoreServices.h>
+#import <Growl/Growl.h>
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -604,6 +605,40 @@ extern int pngcrush_main(int argc, char *argv[]);
 		// Display "OK" icon
 		[self momentarilyDisplayIcon:iconOk];
 
+		//play sound
+		NSSound* confirm = [NSSound soundNamed:@"Glass"];
+		[confirm play];
+		
+		//growl alert
+		NSBundle *myBundle = [NSBundle bundleForClass:[DPAppDelegate class]];
+		NSString *growlPath = [[myBundle privateFrameworksPath] stringByAppendingPathComponent:@"Growl.framework"];
+		NSBundle *growlBundle = [NSBundle bundleWithPath:growlPath];
+		
+		if (growlBundle && [growlBundle load]) {
+			// Register ourselves as a Growl delegate
+			[GrowlApplicationBridge setGrowlDelegate:self];
+			
+			NSArray *path = [op.path componentsSeparatedByString:@"/"];
+			NSString *filename = [path objectAtIndex:(NSUInteger)4];
+			NSString *suffix = @" has been uploaded successfully!";
+			NSString *message = [filename stringByAppendingString:suffix];
+			//NSLog(@"Array is: %d\n%@", [path count], path);
+			
+			//NSLog(@"Array element: %@", filename);
+			[GrowlApplicationBridge notifyWithTitle:@"Upload complete!"
+										description:message
+								   notificationName:@"Upload complete"
+										   iconData:nil
+										   priority:0
+										   isSticky:NO
+									   clickContext:[NSDate date]], op.path;
+			//NSLog(@"filename: %@", op.path);
+		}
+		else {
+			NSLog(@"ERROR: Could not load Growl.framework");
+		}
+		
+		
 		// Write thumbnail
 		if (enableThumbnails)
 			[self writeThumbnailForScreenshotAtPath:op.path];
@@ -1055,6 +1090,7 @@ extern int pngcrush_main(int argc, char *argv[]);
 	#endif
 
 	[self updateListOfRecentUploads];
+	[GrowlApplicationBridge setGrowlDelegate:self];
 }
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
